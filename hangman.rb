@@ -4,7 +4,7 @@ class Game
     attr_accessor :word
     attr_accessor :slots
     attr_accessor :incorrect_guesses
-    @@lives = 4
+    attr_accessor :lives
 
     def dictonary
         File.readlines('5desk.txt').map(&:chomp)
@@ -21,6 +21,19 @@ class Game
     end
 
     def load_game
+        file = YAML.load(File.read("saved_game"))
+        @word = file.word
+        @lives = file.lives
+        @slots = file.slots
+        @incorrect_guesses = file.incorrect_guesses
+    end
+
+    def open_save?
+        puts "would you like to open a save?(y/n)"
+        input = gets.downcase.chomp
+        if input == "y"
+            load_game
+        end
     end
 
     def make_slots
@@ -42,7 +55,7 @@ class Game
     end
 
     def display
-        puts @@lives
+        puts @lives
         puts @incorrect_guesses.rjust(20)
         puts ""
         puts ""
@@ -55,7 +68,7 @@ class Game
             update_slots(guess)
             turn
         else
-            @@lives -= 1
+            @lives -= 1
             @incorrect_guesses += guess
             gameover?
             turn
@@ -63,7 +76,7 @@ class Game
     end
 
     def gameover?
-        if @@lives == 0
+        if @lives == 0
             puts "gameover"
             exit
         end
@@ -79,9 +92,11 @@ class Game
     end
 
     def setup
-        puts @word = secret_word.downcase
+        @word = secret_word.downcase
+        @lives = 4
         make_slots
         @incorrect_guesses = ""
+        open_save?
         display
         check_guess(gets.downcase.chomp)
     end
